@@ -8,6 +8,7 @@ const LandingPage = () => {
   const servicesRef = useRef([]);
   const portfoliosRef = useRef([]);
   const testimonialsRef = useRef([]);
+  const [activeSection, setActiveSection] = useState(0);
 
   useEffect(() => {
     // Animate hero on mount
@@ -36,6 +37,36 @@ const LandingPage = () => {
         if (ref) observer.unobserve(ref);
       });
     };
+  }, []);
+
+  // Track active section on scroll
+  useEffect(() => {
+    const sections = [
+      { id: 'home', index: 0 },
+      { id: 'services', index: 1 },
+      { id: 'portfolios', index: 2 },
+      { id: 'testimonials', index: 3 }
+    ];
+
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + window.innerHeight / 2;
+
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = document.getElementById(sections[i].id);
+        if (section) {
+          const sectionTop = section.offsetTop;
+          if (scrollPosition >= sectionTop) {
+            setActiveSection(sections[i].index);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Call once on mount
+
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Prevent body scroll when modal is open
@@ -193,6 +224,12 @@ const LandingPage = () => {
     }
   };
 
+  const sections = ['home', 'services', 'portfolios', 'testimonials'];
+
+  const scrollToSectionByIndex = (index) => {
+    scrollToSection(sections[index]);
+  };
+
   return (
     <div className="landing-page">
       {/* Animated Background */}
@@ -216,21 +253,43 @@ const LandingPage = () => {
         </div>
       </header>
 
-      {/* Original Hero Section */}
+      {/* Hero Section - Split Layout */}
       <section id="home" className="hero-section" ref={heroRef}>
-        <div className="hero-content">
-          <div className="name-container">
-            <h1 className="first-name">Norah</h1>
-            <h1 className="middle-name">Jepchirchir</h1>
-            <h1 className="last-name">Rutto</h1>
+        <div className="hero-split-container">
+          {/* Left Panel */}
+          <div className="hero-left-panel">
+            <div className="hero-left-content">
+              <div className="hero-subtitle">CREATIVE PROFESSIONAL</div>
+              <div className="hero-main-title">
+                <h1 className="hero-name-part">NORAH</h1>
+                <h1 className="hero-name-part">JEPCHIRCHIR</h1>
+                <h1 className="hero-name-part">RUTTO</h1>
+              </div>
+              <p className="hero-description">
+                A multidisciplinary creative professional specializing in vector design, 
+                solution architecture, visual taxonomy, and design philosophy. 
+                Transforming ideas into elegant visual solutions.
+              </p>
+              <button className="hero-cta-button">EXPLORE WORK</button>
+            </div>
           </div>
-          <div className="tagline">
-            <p className="tagline-text">Where design meets architecture</p>
-            <p className="tagline-text">Where vision meets taxonomy</p>
-            <p className="tagline-text">Where pixels meet philosophy</p>
-          </div>
-          <div className="scroll-indicator">
-            <div className="scroll-arrow"></div>
+
+          {/* Right Panel */}
+          <div className="hero-right-panel">
+            <div className="hero-right-content">
+              <div className="hero-large-text">CREATIVE</div>
+              <div className="hero-roles-list">
+                <div className="hero-role-item">Vector Oriented</div>
+                <div className="hero-role-item">Solution Architect</div>
+                <div className="hero-role-item">Visual Taxonomist</div>
+                <div className="hero-role-item">Pixel Philosopher</div>
+              </div>
+            </div>
+            <div className="hero-scroll-indicator">
+              <div className="scroll-dot active"></div>
+              <div className="scroll-dot"></div>
+              <div className="scroll-dot"></div>
+            </div>
           </div>
         </div>
       </section>
@@ -369,6 +428,28 @@ const LandingPage = () => {
           </div>
         </div>
       )}
+
+      {/* Sticky Page Indicator */}
+      <div className="page-indicator">
+        {sections.map((section, index) => (
+          <div
+            key={section}
+            className={`page-dot ${activeSection === index ? 'active' : ''}`}
+            onClick={() => scrollToSectionByIndex(index)}
+            role="button"
+            tabIndex={0}
+            aria-label={`Go to ${section} section`}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                scrollToSectionByIndex(index);
+              }
+            }}
+          >
+            <span className="page-dot-tooltip">{section}</span>
+          </div>
+        ))}
+      </div>
 
       {/* Footer */}
       <footer className="footer">
